@@ -1,0 +1,44 @@
+version: "1.2"
+
+# 목적:
+# - KOSIS는 table_id/orgId/항목코드가 케이스/기간에 따라 바뀌기 쉬워 “dataset_key”로 추상화한다.
+# - 커넥터는 params_json에 dataset_keys만 받고, 실제 호출 파라미터는 여기에서 해석한다.
+#
+# 상태:
+# - (2026-01-03) ENV_BASE_SOCIO용 기본 프리셋 1세트를 제공한다(인구/가구/주택).
+# - 케이스별로 필요한 지표/행정구역 레벨이 다르면 dataset을 추가/교체한다.
+
+datasets:
+  POP_HOUSEHOLDS:
+    description: "인구/세대(연도별) — 인구총조사(등록센서스) 기본표"
+    # NOTE:
+    # - KOSIS에서 orgId/tblId 기반 조회는 `statisticsData.do`가 아니라
+    #   `openapi/Param/statisticsParameterData.do` 엔드포인트가 안정적으로 동작한다.
+    # - objL1은 행정구역 코드(C1)이며, KOSIS getMeta(type=ITM, objId=A)로 코드 목록을 확인할 수 있다.
+    endpoint_url: "https://kosis.kr/openapi/Param/statisticsParameterData.do"
+    query_params:
+      orgId: "101"
+      tblId: "DT_1IN1502"
+      prdSe: "Y" # year
+      startPrdDe: "{start_year}"
+      endPrdDe: "{end_year}"
+      objL1: "{admin_code}" # C1 (행정구역 코드)
+      itmId: "T100,T200" # 총인구, 가구-계
+    mappings:
+      # match_itm_id 우선(권장).
+      - { output_col: "population_total", match_itm_id: "T100" } # 총인구
+      - { output_col: "households", match_itm_id: "T200" } # 가구-계
+
+  HOUSING_STATUS:
+    description: "주택 현황(연도별) — 인구총조사(등록센서스) 기본표"
+    endpoint_url: "https://kosis.kr/openapi/Param/statisticsParameterData.do"
+    query_params:
+      orgId: "101"
+      tblId: "DT_1IN1502"
+      prdSe: "Y" # year
+      startPrdDe: "{start_year}"
+      endPrdDe: "{end_year}"
+      objL1: "{admin_code}" # C1 (행정구역 코드)
+      itmId: "T310" # 주택_계
+    mappings:
+      - { output_col: "housing_total", match_itm_id: "T310" } # 주택_계

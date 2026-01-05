@@ -1,0 +1,315 @@
+version: "1.0"
+
+doc_profile:
+  report_type: "소규모환경영향평가서"
+  project_type: "관광농원"
+  language: "ko"
+  numbering:
+    chapter_style: "제{n}장"
+    # Use `<표 ...>`, `<그림 ...>` caption format in the renderer.
+    # `label` is either:
+    # - fixed label in the spec (e.g. "2.3"), or
+    # - auto-generated "chapter-counter" (e.g. "1-1").
+    table_style: "표 {label}"
+    figure_style: "그림 {label}"
+  forbidden_phrases:
+    - "문제 없음"
+    - "영향 없음"
+    - "영향이 없음"
+
+# 2025 안내서 기반 엔진 규칙(고정)
+global_rules:
+  scoping:
+    categories: ["중점", "현황", "제외"]
+    require_exclude_reason_if_excluded: true
+  prior_assessment_omission:
+    enable: true
+    basis: "시행령 제60조"
+    rule_ref_source_id: "SRC-LAW-60"
+  small_scale_special:
+    default_no_manager_no_post_monitoring: true
+    conditional_sections:
+      CH5_2_ORG: "management_plan.include_section_5_2_org_responsibility"
+      CH5_3_MONITORING: "management_plan.include_section_5_3_monitoring"
+
+sections:
+  - id: "CH0_COVER"
+    heading: "표지"
+    anchor: "[[BLOCK:CH0_COVER]]"
+    mode: "deterministic"
+    input_paths: ["cover"]
+    qa:
+      error_if_missing:
+        - "cover.project_name"
+        - "cover.submit_date"
+
+  - id: "CH0_SUMMARY"
+    heading: "요약"
+    anchor: "[[BLOCK:CH0_SUMMARY]]"
+    mode: "hybrid"
+    input_paths:
+      - "summary_inputs"
+      - "project_overview"
+      - "applicability"
+      - "scoping_matrix"
+      - "mitigation.measures"
+    outputs: {}
+
+  - id: "CH1_PURPOSE"
+    heading: "제1장 사업의 개요 / 사업의 목적 및 필요성"
+    anchor: "[[BLOCK:CH1_PURPOSE]]"
+    mode: "llm"
+    input_paths: ["project_overview.purpose_need"]
+
+  - id: "CH1_LOCATION_AREA"
+    heading: "제1장 사업의 개요 / 사업의 위치 및 면적"
+    anchor: "[[BLOCK:CH1_LOCATION_AREA]]"
+    mode: "hybrid"
+    input_paths:
+      - "project_overview.location"
+      - "project_overview.area"
+      - "assets"
+    outputs:
+      tables: ["TBL-PARCELS", "TBL-ZONING-BREAKDOWN"]
+      figures: ["FIG-LOC-01"]
+    qa:
+      error_if_missing:
+        - "project_overview.area.total_area_m2"
+
+  - id: "CH1_SCALE"
+    heading: "제1장 사업의 개요 / 사업 내용 및 규모"
+    anchor: "[[BLOCK:CH1_SCALE]]"
+    mode: "hybrid"
+    input_paths:
+      - "project_overview.contents_scale"
+      - "assets"
+    outputs:
+      tables: ["TBL-FACILITIES"]
+      figures: ["FIG-LAYOUT-01"]
+
+  - id: "CH1_SCHEDULE"
+    heading: "제1장 사업의 개요 / 사업 추진 일정"
+    anchor: "[[BLOCK:CH1_SCHEDULE]]"
+    mode: "deterministic"
+    input_paths: ["project_overview.schedule"]
+    outputs:
+      tables: ["TBL-SCHEDULE"]
+
+  - id: "CH1_APPLICABILITY"
+    heading: "제1장 사업의 개요 / 인허가 현황 및 협의 대상 근거"
+    anchor: "[[BLOCK:CH1_APPLICABILITY]]"
+    mode: "hybrid"
+    input_paths:
+      - "project_overview.legal_permits"
+      - "applicability"
+      - "prior_assessments"
+
+  - id: "SSOT_CH2_REUSE_PDF"
+    heading: "제2장 지역개황 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH2_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH3_REUSE_PDF"
+    heading: "제3장 대상사업의 지역 범위 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH3_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH4_REUSE_PDF"
+    heading: "제4장 대상지역의 주변지역에 대한 토지이용 현황 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH4_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH5_REUSE_PDF"
+    heading: "제5장 환경 현황 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH5_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH6_REUSE_PDF"
+    heading: "제6장 입지의 타당성 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH6_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH7_REUSE_PDF"
+    heading: "제7장 환경에 미치는 영향의 조사·예측·평가 및 환경보전방안 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH7_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "SSOT_CH8_REUSE_PDF"
+    heading: "제10장 종합평가 및 결론 / (SSOT) 샘플 PDF REUSE"
+    anchor: "[[BLOCK:SSOT_CH8_REUSE_PDF]]"
+    mode: "deterministic"
+
+  - id: "CH2_METHOD"
+    heading: "제2장 환경현황 조사 / 조사 범위·방법"
+    anchor: "[[BLOCK:CH2_METHOD]]"
+    mode: "hybrid"
+    input_paths:
+      - "survey_plan"
+      - "scoping_matrix"
+    outputs:
+      tables:
+        [
+          "TBL-ZONING-OVERLAY",
+          "TBL-ENV-AIR-STANDARDS",
+          "TBL-ENV-LIVING-STANDARDS",
+          "TBL-ENV-NOISE-STANDARDS",
+        ]
+      figures: ["FIG-IA-01"]
+
+  - id: "CH2_TOPO"
+    heading: "제2장 환경현황 조사 / 지형·지질"
+    anchor: "[[BLOCK:CH2_TOPO]]"
+    mode: "llm"
+    input_paths: ["baseline.topography_geology"]
+
+  - id: "CH2_ECO"
+    heading: "제2장 환경현황 조사 / 동·식물상(자연생태)"
+    anchor: "[[BLOCK:CH2_ECO]]"
+    mode: "hybrid"
+    input_paths:
+      - "baseline.ecology"
+      - "assets"
+    outputs:
+      tables: ["TBL-ECO-FLORA", "TBL-ECO-FAUNA"]
+      figures: ["FIG-ECO-ROUTE-01", "FIG-ECO-PHOTO-01"]
+    qa:
+      # “중점”일 때는 더 엄격한 QA로 승격 가능(정책)
+      warn_if_missing:
+        - "baseline.ecology.survey_dates"
+
+  - id: "CH2_WATER"
+    heading: "제2장 환경현황 조사 / 수환경"
+    anchor: "[[BLOCK:CH2_WATER]]"
+    mode: "llm"
+    input_paths: ["baseline.water_environment"]
+
+  - id: "CH2_AIR"
+    heading: "제2장 환경현황 조사 / 대기질"
+    anchor: "[[BLOCK:CH2_AIR]]"
+    mode: "llm"
+    input_paths: ["baseline.air_quality"]
+
+  - id: "CH2_NOISE"
+    heading: "제2장 환경현황 조사 / 소음·진동"
+    anchor: "[[BLOCK:CH2_NOISE]]"
+    mode: "llm"
+    input_paths: ["baseline.noise_vibration"]
+
+  - id: "CH2_ODOR"
+    heading: "제2장 환경현황 조사 / 악취"
+    anchor: "[[BLOCK:CH2_ODOR]]"
+    mode: "llm"
+    input_paths: ["baseline"]
+
+  - id: "CH2_LANDUSE"
+    heading: "제2장 환경현황 조사 / 토지이용"
+    anchor: "[[BLOCK:CH2_LANDUSE]]"
+    mode: "hybrid"
+    input_paths:
+      - "baseline.landuse_landscape"
+      - "assets"
+    outputs:
+      figures: ["FIG-LANDUSE-01", "FIG-AERIAL-01"]
+
+  - id: "CH2_LANDSCAPE"
+    heading: "제2장 환경현황 조사 / 경관"
+    anchor: "[[BLOCK:CH2_LANDSCAPE]]"
+    mode: "hybrid"
+    input_paths:
+      - "baseline.landuse_landscape.key_viewpoints"
+      - "assets"
+    outputs:
+      figures: ["FIG-VP-01", "FIG-VP-02"]
+
+  - id: "CH2_POP_TRAFFIC"
+    heading: "제2장 환경현황 조사 / 인구·주거/교통"
+    anchor: "[[BLOCK:CH2_POP_TRAFFIC]]"
+    mode: "llm"
+    input_paths: ["baseline.population_traffic"]
+
+  - id: "CH2_BASELINE_SUMMARY"
+    heading: "제2장 환경현황 조사 / 환경현황 요약표"
+    anchor: "[[TABLE:BASELINE_SUMMARY]]"
+    mode: "deterministic"
+    outputs:
+      tables: ["TBL-BASELINE-SUMMARY"]
+
+  - id: "CH3_SCOPING"
+    heading: "제3장 환경영향 예측 / 평가항목 선정"
+    anchor: "[[BLOCK:CH3_SCOPING]]"
+    mode: "hybrid"
+    outputs:
+      tables: ["TBL-SCOPING"]
+
+  - id: "CH3_CONSTRUCTION"
+    heading: "제3장 환경영향 예측 / 공사 단계"
+    anchor: "[[BLOCK:CH3_CONSTRUCTION]]"
+    mode: "hybrid"
+    input_paths:
+      - "impact_prediction.construction"
+      - "mitigation.measures"
+      - "scoping_matrix"
+
+  - id: "CH3_OPERATION"
+    heading: "제3장 환경영향 예측 / 운영 단계"
+    anchor: "[[BLOCK:CH3_OPERATION]]"
+    mode: "hybrid"
+    input_paths:
+      - "impact_prediction.operation"
+      - "mitigation.measures"
+      - "scoping_matrix"
+
+  - id: "CH4_MITIGATION"
+    heading: "제4장 환경보전 및 저감방안"
+    anchor: "[[BLOCK:CH4_MITIGATION]]"
+    mode: "hybrid"
+    input_paths: ["mitigation.measures"]
+    outputs:
+      tables: ["TBL-MITIGATION-PLAN"]
+      figures: ["FIG-DRAINAGE-01"]
+
+  - id: "CH5_TRACKER"
+    heading: "제5장 환경관리 계획 / 협의조건 이행관리"
+    anchor: "[[BLOCK:CH5_TRACKER]]"
+    mode: "hybrid"
+    input_paths: ["management_plan"]
+    outputs:
+      tables: ["TBL-CONDITION-TRACKER"]
+
+  - id: "CH5_2_ORG"
+    heading: "제5장 환경관리 계획 / 관리조직·책임자(해당 시)"
+    anchor: "[[BLOCK:CH5_2_ORG]]"
+    mode: "llm"
+    condition: "management_plan.include_section_5_2_org_responsibility == true"
+    input_paths: ["management_plan"]
+
+  - id: "CH5_3_MONITORING"
+    heading: "제5장 환경관리 계획 / 모니터링·사후조사(협의조건 요구 시)"
+    anchor: "[[BLOCK:CH5_3_MONITORING]]"
+    mode: "llm"
+    condition: "management_plan.include_section_5_3_monitoring == true"
+    input_paths: ["management_plan"]
+
+  - id: "CH6_PUBLIC"
+    heading: "제6장 주민의견 수렴 결과(해당 시)"
+    anchor: "[[BLOCK:CH6_PUBLIC]]"
+    mode: "llm"
+    condition: "resident_opinion.applicable == true"
+    input_paths: ["resident_opinion"]
+
+  - id: "CH7_CONCLUSION"
+    heading: "제7장 종합평가 및 결론"
+    anchor: "[[BLOCK:CH7_CONCLUSION]]"
+    mode: "hybrid"
+    input_paths:
+      - "scoping_matrix"
+      - "impact_prediction"
+      - "mitigation.measures"
+      - "management_plan"
+
+  - id: "APPX_SOURCES"
+    heading: "부록 / 출처·근거 관리표"
+    anchor: "[[TABLE:SOURCE_REGISTER]]"
+    mode: "deterministic"
+    outputs:
+      tables: ["TBL-SOURCE-REGISTER"]

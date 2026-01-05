@@ -1,0 +1,30 @@
+version: "1.0"
+
+# 목적(Submission mode / DIA):
+# - 재해영향평가(DIA) 제출 관점에서, 핵심 누락을 ERROR로 조기에 차단한다.
+# - CLI에서 `--submission` 옵션으로 선택 적용한다(보고서 종류별로 규칙 파일을 분리).
+
+rules:
+  - id: LOC_MISSING_CENTER
+    when:
+      sheet: LOCATION
+      column: center_lat
+      is_empty: true
+    severity: ERROR
+    message: "LOCATION.center_lat/center_lon이 비어 있습니다(지도/WMS/API 수집 불가)."
+    suggested_sources:
+      - src_id: "SRC_SURVEY_ATTACHMENT"
+        how: "측량성과/좌표 근거(PDF)를 첨부하고 LOCATION에 좌표 입력"
+      - src_id: "SRC_GEOCODE_API"
+        how: "주소 기반 지오코딩(옵션)으로 좌표 확보"
+
+  - id: DRR_RAIN_EMPTY
+    when:
+      sheet: DRR_HYDRO_RAIN
+      row_count: 0
+    severity: ERROR
+    message: "DRR_HYDRO_RAIN이 비어 있습니다(DIA 강우/유출 근거 부족)."
+    suggested_sources:
+      - src_id: "SRC_KMA_ASOS_API"
+        how: "DATA_REQUESTS(KMA_ASOS) 자동 수집 또는 수기 입력"
+

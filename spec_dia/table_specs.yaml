@@ -1,0 +1,275 @@
+version: "1.0"
+
+defaults:
+  include_src_column: true
+  src_render: "join"
+  empty_cell: "[작성자 기입 필요]"
+
+tables:
+  # Shared core tables (reused in EIA/DIA)
+  - id: "TBL-PARCELS"
+    anchor: "[[TABLE:PARCELS]]"
+    caption: "지번별 면적 및 토지이용(지목/용도지역) 현황"
+    chapter: 1
+    data_path: "project_overview.area.parcels"
+    columns:
+      - { key: "no", title: "No", type: "auto_index" }
+      - { key: "jibun", title: "지번", type: "text", path: "jibun.t" }
+      - { key: "land_category", title: "지목", type: "text", path: "land_category.t" }
+      - { key: "zoning", title: "용도지역", type: "text", path: "zoning.t" }
+      - { key: "area_m2", title: "면적(m²)", type: "number", path: "area_m2.v", unit_path: "area_m2.u" }
+      - { key: "note", title: "비고", type: "text", path: "note.t", allow_empty: true }
+
+  - id: "TBL-FACILITIES"
+    anchor: "[[TABLE:FACILITIES]]"
+    caption: "주요 시설별 계획(규모·면적·수용인원)"
+    chapter: 1
+    data_path: "project_overview.contents_scale.facilities"
+    columns:
+      - { key: "category", title: "구분", type: "text", path: "category.t" }
+      - { key: "name", title: "시설명", type: "text", path: "name.t" }
+      - { key: "qty", title: "수량", type: "number", path: "qty.v", unit_path: "qty.u", allow_empty: true }
+      - { key: "area_m2", title: "면적(m²)", type: "number", path: "area_m2.v", unit_path: "area_m2.u", allow_empty: true }
+      - { key: "capacity", title: "수용(명)", type: "number", path: "capacity_person.v", unit_path: "capacity_person.u", allow_empty: true }
+      - { key: "note", title: "비고", type: "text", path: "note.t", allow_empty: true }
+    validations:
+      - id: "W-FAC-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-SCHEDULE"
+    anchor: "[[TABLE:SCHEDULE]]"
+    caption: "사업 추진 일정(공정)"
+    chapter: 1
+    data_path: "project_overview.schedule.milestones"
+    columns:
+      - { key: "phase", title: "단계", type: "text", path: "phase.t" }
+      - { key: "start", title: "시작", type: "date_ym", path: "start.t" }
+      - { key: "end", title: "종료", type: "date_ym", path: "end.t" }
+
+  # DIA-specific tables
+  - id: "TBL-DIA-SCOPING"
+    anchor: "[[TABLE:DIA_SCOPE]]"
+    caption: "재해 검토항목(대상/제외) 및 사유"
+    chapter: 2
+    data_path: "disaster.scoping_matrix"
+    columns:
+      - { key: "hazard_item", title: "검토항목", type: "text", path: "hazard_item.t" }
+      - { key: "applicable", title: "대상여부", type: "enum", path: "applicable.t", enum: ["YES","NO","UNKNOWN"] }
+      - { key: "analysis_level", title: "검토수준", type: "text", path: "analysis_level.t" }
+      - { key: "exclude_reason", title: "제외/해당없음 사유", type: "text", path: "exclude_reason.t", allow_empty: true }
+    validations:
+      - id: "W-DIA-SCOPE-001"
+        type: "required_if"
+        condition:
+          path: "applicable.t"
+          equals: "NO"
+        required_path: "exclude_reason.t"
+        severity: "WARN"
+
+  - id: "TBL-DIA-TARGET-AREA"
+    anchor: "[[TABLE:DIA_TARGET_AREA]]"
+    caption: "평가대상지역 설정(사업개념/상류유역/하류/주변지역 개요)"
+    chapter: 2
+    data_path: "disaster.target_area"
+    columns:
+      - { key: "concept", title: "사업개념", type: "text", path: "concept.t" }
+      - { key: "upstream_area_km2", title: "상류유역면적(km²)", type: "number", path: "upstream_area_km2.v", unit_path: "upstream_area_km2.u" }
+      - { key: "downstream_to", title: "하류검토 범위", type: "text", path: "downstream_to.t" }
+      - { key: "affected_neighborhood", title: "주변 영향지역", type: "text", path: "affected_neighborhood.t" }
+      - { key: "map_fig_id", title: "관련 도면", type: "text", path: "map_fig_id.t" }
+    validations:
+      - id: "W-DIA-TA-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-DIA-TARGET-AREA-PARTS"
+    anchor: "[[TABLE:DIA_TARGET_AREA_PARTS]]"
+    caption: "평가대상지역 설정(사업지구/상류유역/하류유역/주변지역 포함·제외 및 사유)"
+    chapter: 2
+    data_path: "disaster.target_area_parts"
+    columns:
+      - { key: "part", title: "구분", type: "text", path: "part.t" }
+      - { key: "included", title: "포함여부", type: "enum", path: "included.t", enum: ["YES","NO","UNKNOWN"] }
+      - { key: "reason", title: "설정사유", type: "text", path: "reason.t", allow_empty: true }
+      - { key: "exclude_reason", title: "제외사유", type: "text", path: "exclude_reason.t", allow_empty: true }
+      - { key: "geom_ref", title: "경계자료", type: "text", path: "geom_ref.t", allow_empty: true }
+      - { key: "figure_id", title: "관련도면", type: "text", path: "figure_id.t", allow_empty: true }
+    validations:
+      - id: "W-DIA-TA-PARTS-001"
+        type: "min_rows"
+        min: 4
+        severity: "WARN"
+      - id: "W-DIA-TA-PARTS-002"
+        type: "required_if"
+        condition:
+          path: "included.t"
+          equals: "NO"
+        required_path: "exclude_reason.t"
+        severity: "WARN"
+      - id: "W-DIA-TA-PARTS-003"
+        type: "required_if"
+        condition:
+          path: "included.t"
+          equals: "YES"
+        required_path: "reason.t"
+        severity: "WARN"
+
+  - id: "TBL-DIA-RAINFALL"
+    anchor: "[[TABLE:DIA_RAINFALL]]"
+    caption: "강우 입력(지속시간/빈도/강우량)"
+    chapter: 3
+    data_path: "disaster.rainfall"
+    columns:
+      - { key: "station_name", title: "관측소", type: "text", path: "station_name.t" }
+      - { key: "duration_min", title: "지속시간(분)", type: "number", path: "duration_min.v", unit_path: "duration_min.u" }
+      - { key: "frequency_year", title: "빈도(년)", type: "number", path: "frequency_year.v", unit_path: "frequency_year.u", allow_empty: true }
+      - { key: "rainfall_mm", title: "강우량(mm)", type: "number", path: "rainfall_mm.v", unit_path: "rainfall_mm.u" }
+      - { key: "source_type", title: "자료유형", type: "text", path: "source_type.t" }
+    validations:
+      - id: "W-DIA-RAIN-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-DIA-BASE-HAZARD"
+    anchor: "[[TABLE:DIA_BASE_HAZARD]]"
+    caption: "재해발생 현황(탐문조사/현장사진/자료조사)"
+    chapter: 3
+    data_path: "disaster.hazard_history"
+    columns:
+      - { key: "hazard_type", title: "재해유형", type: "text", path: "hazard_type.t" }
+      - { key: "occurred", title: "발생여부", type: "text", path: "occurred.t" }
+      - { key: "interview_done", title: "탐문조사", type: "text", path: "interview_done.t" }
+      - { key: "interview_summary", title: "탐문/자료 요약", type: "text", path: "interview_summary.t", allow_empty: true }
+      - { key: "photo_fig_id", title: "현장사진/도면", type: "text", path: "photo_fig_id.t", allow_empty: true }
+      - { key: "evidence_id", title: "증빙", type: "text", path: "evidence_id.t", allow_empty: true }
+    validations:
+      - id: "W-DIA-HZ-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+      - id: "W-DIA-HZ-002"
+        type: "required_if"
+        condition:
+          path: "interview_done.t"
+          equals: "Y"
+        required_path: "interview_summary.t"
+        severity: "WARN"
+
+  - id: "TBL-DIA-INTERVIEWS"
+    anchor: "[[TABLE:DIA_INTERVIEWS]]"
+    caption: "주민 탐문조사(익명) 요약"
+    chapter: 3
+    data_path: "disaster.interviews"
+    columns:
+      - { key: "respondent_id", title: "응답자(익명)", type: "text", path: "respondent_id.t" }
+      - { key: "residence_years", title: "거주년수(년)", type: "number", path: "residence_years.v", unit_path: "residence_years.u", allow_empty: true }
+      - { key: "location_desc", title: "거주지(개략)", type: "text", path: "location_desc.t", allow_empty: true }
+      - { key: "summary", title: "주요 진술/이력", type: "text", path: "summary.t" }
+      - { key: "photo_fig_id", title: "사진/도면", type: "text", path: "photo_fig_id.t", allow_empty: true }
+      - { key: "evidence_id", title: "증빙", type: "text", path: "evidence_id.t", allow_empty: true }
+    validations:
+      - id: "W-DIA-INT-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-DIA-RUNOFF"
+    anchor: "[[TABLE:DIA_RUNOFF]]"
+    caption: "유역/유출 해석 입력(사업 전/후 비교)"
+    chapter: 4
+    data_path: "disaster.runoff_basins"
+    columns:
+      - { key: "basin_id", title: "유역ID", type: "text", path: "basin_id.t" }
+      - { key: "basin_area_km2", title: "면적(km²)", type: "number", path: "basin_area_km2.v", unit_path: "basin_area_km2.u" }
+      - { key: "cn_value", title: "CN", type: "number", path: "cn_value.v", unit_path: "cn_value.u", allow_empty: true }
+      - { key: "pre_peak_cms", title: "사업 전 첨두유출(m³/s)", type: "number", path: "pre_peak_cms.v", unit_path: "pre_peak_cms.u", allow_empty: true }
+      - { key: "post_peak_cms", title: "사업 후 첨두유출(m³/s)", type: "number", path: "post_peak_cms.v", unit_path: "post_peak_cms.u", allow_empty: true }
+      - { key: "delta_peak_cms", title: "증가량(m³/s)", type: "number", path: "delta_peak_cms.v", unit_path: "delta_peak_cms.u", allow_empty: true }
+      - { key: "model", title: "산정방법", type: "text", path: "model.t" }
+    validations:
+      - id: "W-DIA-RUNOFF-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-DIA-SEDIMENT"
+    anchor: "[[TABLE:DIA_SEDIMENT]]"
+    caption: "토사유출/침식 산정(USLE/RUSLE)"
+    chapter: 4
+    data_path: "disaster.sediment_erosion"
+    columns:
+      - { key: "sed_id", title: "ID", type: "text", path: "sed_id.t" }
+      - { key: "method", title: "방법", type: "text", path: "method.t" }
+      - { key: "r_factor", title: "R", type: "number", path: "r_factor.v", unit_path: "r_factor.u", allow_empty: true }
+      - { key: "k_factor", title: "K", type: "number", path: "k_factor.v", unit_path: "k_factor.u", allow_empty: true }
+      - { key: "ls_factor", title: "LS", type: "number", path: "ls_factor.v", unit_path: "ls_factor.u", allow_empty: true }
+      - { key: "c_factor", title: "C", type: "number", path: "c_factor.v", unit_path: "c_factor.u", allow_empty: true }
+      - { key: "p_factor", title: "P", type: "number", path: "p_factor.v", unit_path: "p_factor.u", allow_empty: true }
+      - { key: "soil_loss_before", title: "개발 전(ton/ha/yr)", type: "number", path: "soil_loss_before.v", unit_path: "soil_loss_before.u", allow_empty: true }
+      - { key: "soil_loss_after", title: "개발 후(ton/ha/yr)", type: "number", path: "soil_loss_after.v", unit_path: "soil_loss_after.u", allow_empty: true }
+
+  - id: "TBL-DIA-SLOPE"
+    anchor: "[[TABLE:DIA_SLOPE]]"
+    caption: "사면/산사태 위험요소(해당 시)"
+    chapter: 4
+    data_path: "disaster.slope_landslide"
+    columns:
+      - { key: "slope_id", title: "ID", type: "text", path: "slope_id.t" }
+      - { key: "exists", title: "사면/보강 대상", type: "text", path: "exists.t" }
+      - { key: "height_m", title: "높이(m)", type: "number", path: "height_m.v", unit_path: "height_m.u", allow_empty: true }
+      - { key: "risk_grade", title: "위험등급", type: "number", path: "risk_grade.v", unit_path: "risk_grade.u", allow_empty: true }
+      - { key: "stabilization", title: "보강/저감", type: "text", path: "stabilization.t", allow_empty: true }
+      - { key: "hazard_map_layer_used", title: "위험도 자료", type: "text", path: "hazard_map_layer_used.t", allow_empty: true }
+
+  - id: "TBL-DIA-DRAINAGE-FACILITIES"
+    anchor: "[[TABLE:DIA_DRAINAGE]]"
+    caption: "우수/배수 시설 현황(규격·통수능·유지관리 우선순위)"
+    chapter: 3
+    data_path: "disaster.drainage_facilities"
+    columns:
+      - { key: "facility_id", title: "시설ID", type: "text", path: "facility_id.t" }
+      - { key: "type", title: "유형", type: "text", path: "type.t" }
+      - { key: "size_desc", title: "규격", type: "text", path: "size_desc.t" }
+      - { key: "capacity", title: "통수능/용량", type: "text", path: "capacity.t" }
+      - { key: "discharge_to", title: "방류처", type: "text", path: "discharge_to.t" }
+      - { key: "maintenance_class", title: "유지관리", type: "text", path: "maintenance_class.t" }
+
+  - id: "TBL-DIA-MEASURES"
+    anchor: "[[TABLE:DIA_MITIGATION]]"
+    caption: "재해 저감대책(공사/운영 단계)"
+    chapter: 5
+    data_path: "disaster.measures"
+    columns:
+      - { key: "measure_id", title: "대책ID", type: "text", path: "measure_id.t" }
+      - { key: "target_hazard", title: "대상재해", type: "text", path: "target_hazard.t" }
+      - { key: "stage", title: "단계", type: "text", path: "stage.t" }
+      - { key: "description", title: "대책내용", type: "text", path: "description.t" }
+      - { key: "linked_facility_id", title: "연계시설", type: "text", path: "linked_facility_id.t", allow_empty: true }
+
+  - id: "TBL-DIA-MAINTENANCE"
+    anchor: "[[TABLE:DIA_MAINTENANCE]]"
+    caption: "유지관리계획 및 유지관리대장"
+    chapter: 6
+    data_path: "disaster.maintenance_ledger"
+    columns:
+      - { key: "asset_id", title: "대상시설/자산", type: "text", path: "asset_id.t" }
+      - { key: "inspection_cycle", title: "점검주기", type: "text", path: "inspection_cycle.t" }
+      - { key: "inspection_item", title: "점검항목", type: "text", path: "inspection_item.t" }
+      - { key: "responsible_role", title: "책임/담당", type: "text", path: "responsible_role.t", allow_empty: true }
+      - { key: "record_format", title: "대장형식", type: "text", path: "record_format.t", allow_empty: true }
+      - { key: "evidence_id_template", title: "증빙ID(패턴)", type: "text", path: "evidence_id_template.t", allow_empty: true }
+    validations:
+      - id: "E-DIA-MNT-001"
+        type: "min_rows"
+        min: 1
+        severity: "ERROR"
+
+  - id: "TBL-SOURCE-REGISTER"
+    anchor: "[[TABLE:SOURCE_REGISTER]]"
+    caption: "출처/근거 관리표(Source Register)"
+    chapter: 0
+    mode: "sources_registry"

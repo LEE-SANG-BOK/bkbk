@@ -1,0 +1,39 @@
+version: "1.0"
+
+defaults:
+  require_source_ids: true
+  empty_caption: "[작성자 캡션 기입]"
+
+figures:
+  - id: "FIG-DIA-TARGET-01"
+    anchor: "[[FIG:FIG-DIA-TARGET-01]]"
+    caption: "평가대상지역 설정도(상류 유역~하류 영향권 포함)"
+    chapter: 2
+    required: true
+    asset_type: "dia_target_area_map"
+    must_include:
+      - "사업지 경계"
+      - "유역/배수체계"
+      - "하천/방류처"
+
+  - id: "FIG-DIA-DRAINAGE-01"
+    anchor: "[[FIG:FIG-DIA-DRAINAGE-01]]"
+    caption: "배수계통도(기존/계획 배수체계)"
+    chapter: 3
+    required: true
+    asset_type: "drainage_map"
+    must_include:
+      - "기존 배수체계"
+      - "계획 배수체계"
+      - "방류처"
+
+  - id: "FIG-DIA-STORMWATER-01"
+    anchor: "[[FIG:FIG-DIA-STORMWATER-01]]"
+    caption: "우수계획도(우수 배제/방류계획)"
+    chapter: 3
+    required: true
+    asset_type: "stormwater_plan_map"
+    must_include:
+      - "우수 배제"
+      - "집수/배수"
+      - "방류계획"

@@ -1,0 +1,133 @@
+version: "1.0"
+
+template_file: "templates/report_template.sample_changwon_2025.docx"
+
+anchors:
+  - anchor: "[[BLOCK:CH0_COVER]]"
+    insert: { type: "section", id: "CH0_COVER" }
+  - anchor: "[[BLOCK:CH0_SUMMARY]]"
+    insert: { type: "section", id: "CH0_SUMMARY" }
+
+  - anchor: "[[BLOCK:CH1_PURPOSE]]"
+    insert: { type: "section", id: "CH1_PURPOSE" }
+  - anchor: "[[BLOCK:CH1_LOCATION_AREA]]"
+    insert: { type: "section", id: "CH1_LOCATION_AREA" }
+  - anchor: "[[TABLE:PARCELS]]"
+    insert: { type: "table", id: "TBL-PARCELS" }
+  - anchor: "[[TABLE:ZONING_BREAKDOWN]]"
+    insert: { type: "table", id: "TBL-ZONING-BREAKDOWN" }
+  - anchor: "[[FIG:FIG-LOC-01]]"
+    insert: { type: "figure", id: "FIG-LOC-01" }
+
+  - anchor: "[[BLOCK:CH1_SCALE]]"
+    insert: { type: "section", id: "CH1_SCALE" }
+  - anchor: "[[TABLE:FACILITIES]]"
+    insert: { type: "table", id: "TBL-FACILITIES" }
+  - anchor: "[[FIG:FIG-LAYOUT-01]]"
+    insert: { type: "figure", id: "FIG-LAYOUT-01" }
+
+  - anchor: "[[BLOCK:CH1_SCHEDULE]]"
+    insert: { type: "section", id: "CH1_SCHEDULE" }
+  - anchor: "[[TABLE:SCHEDULE]]"
+    insert: { type: "table", id: "TBL-SCHEDULE" }
+
+  - anchor: "[[BLOCK:CH1_APPLICABILITY]]"
+    insert: { type: "section", id: "CH1_APPLICABILITY" }
+
+  - anchor: "[[BLOCK:SSOT_CH2_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH2_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH3_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH3_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH4_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH4_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH5_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH5_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH6_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH6_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH7_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH7_REUSE_PDF" }
+  - anchor: "[[BLOCK:SSOT_CH8_REUSE_PDF]]"
+    insert: { type: "section", id: "SSOT_CH8_REUSE_PDF" }
+
+  - anchor: "[[BLOCK:CH2_METHOD]]"
+    insert: { type: "section", id: "CH2_METHOD" }
+  - anchor: "[[TABLE:ZONING_OVERLAY]]"
+    insert: { type: "table", id: "TBL-ZONING-OVERLAY" }
+  - anchor: "[[TABLE:ENV_AIR_STANDARDS]]"
+    insert: { type: "table", id: "TBL-ENV-AIR-STANDARDS" }
+  - anchor: "[[TABLE:ENV_LIVING_STANDARDS]]"
+    insert: { type: "table", id: "TBL-ENV-LIVING-STANDARDS" }
+  - anchor: "[[TABLE:ENV_NOISE_STANDARDS]]"
+    insert: { type: "table", id: "TBL-ENV-NOISE-STANDARDS" }
+  - anchor: "[[FIG:FIG-IA-01]]"
+    insert: { type: "figure", id: "FIG-IA-01" }
+
+  - anchor: "[[BLOCK:CH2_TOPO]]"
+    insert: { type: "section", id: "CH2_TOPO" }
+  - anchor: "[[BLOCK:CH2_ECO]]"
+    insert: { type: "section", id: "CH2_ECO" }
+  - anchor: "[[FIG:FIG-ECO-ROUTE-01]]"
+    insert: { type: "figure", id: "FIG-ECO-ROUTE-01" }
+  - anchor: "[[FIG:FIG-ECO-PHOTO-01]]"
+    insert: { type: "figure", id: "FIG-ECO-PHOTO-01" }
+  - anchor: "[[BLOCK:CH2_WATER]]"
+    insert: { type: "section", id: "CH2_WATER" }
+  - anchor: "[[BLOCK:CH2_AIR]]"
+    insert: { type: "section", id: "CH2_AIR" }
+  - anchor: "[[BLOCK:CH2_NOISE]]"
+    insert: { type: "section", id: "CH2_NOISE" }
+  - anchor: "[[BLOCK:CH2_ODOR]]"
+    insert: { type: "section", id: "CH2_ODOR" }
+  - anchor: "[[BLOCK:CH2_LANDUSE]]"
+    insert: { type: "section", id: "CH2_LANDUSE" }
+  - anchor: "[[FIG:FIG-LANDUSE-01]]"
+    insert: { type: "figure", id: "FIG-LANDUSE-01" }
+  - anchor: "[[FIG:FIG-AERIAL-01]]"
+    insert: { type: "figure", id: "FIG-AERIAL-01" }
+  - anchor: "[[BLOCK:CH2_LANDSCAPE]]"
+    insert: { type: "section", id: "CH2_LANDSCAPE" }
+  - anchor: "[[FIG:FIG-VP-01]]"
+    insert: { type: "figure", id: "FIG-VP-01" }
+  - anchor: "[[FIG:FIG-VP-02]]"
+    insert: { type: "figure", id: "FIG-VP-02" }
+  - anchor: "[[BLOCK:CH2_POP_TRAFFIC]]"
+    insert: { type: "section", id: "CH2_POP_TRAFFIC" }
+  - anchor: "[[TABLE:BASELINE_SUMMARY]]"
+    insert: { type: "table", id: "TBL-BASELINE-SUMMARY" }
+
+  - anchor: "[[BLOCK:CH3_SCOPING]]"
+    insert: { type: "section", id: "CH3_SCOPING" }
+  - anchor: "[[TABLE:SCOPING]]"
+    insert: { type: "table", id: "TBL-SCOPING" }
+  - anchor: "[[BLOCK:CH3_CONSTRUCTION]]"
+    insert: { type: "section", id: "CH3_CONSTRUCTION" }
+  - anchor: "[[BLOCK:CH3_OPERATION]]"
+    insert: { type: "section", id: "CH3_OPERATION" }
+
+  - anchor: "[[BLOCK:CH4_MITIGATION]]"
+    insert: { type: "section", id: "CH4_MITIGATION" }
+  - anchor: "[[FIG:FIG-DRAINAGE-01]]"
+    insert: { type: "figure", id: "FIG-DRAINAGE-01" }
+  - anchor: "[[TABLE:MITIGATION_PLAN]]"
+    insert: { type: "table", id: "TBL-MITIGATION-PLAN" }
+
+  - anchor: "[[BLOCK:CH5_TRACKER]]"
+    insert: { type: "section", id: "CH5_TRACKER" }
+  - anchor: "[[TABLE:CONDITION_TRACKER]]"
+    insert: { type: "table", id: "TBL-CONDITION-TRACKER" }
+  - anchor: "[[BLOCK:CH5_2_ORG]]"
+    insert: { type: "section", id: "CH5_2_ORG", conditional: true }
+  - anchor: "[[BLOCK:CH5_3_MONITORING]]"
+    insert: { type: "section", id: "CH5_3_MONITORING", conditional: true }
+
+  - anchor: "[[BLOCK:CH6_PUBLIC]]"
+    insert: { type: "section", id: "CH6_PUBLIC", conditional: true }
+
+  - anchor: "[[BLOCK:CH7_CONCLUSION]]"
+    insert: { type: "section", id: "CH7_CONCLUSION" }
+
+  - anchor: "[[BLOCK:APPENDIX_INSERTS]]"
+    insert: { type: "section", id: "APPENDIX_INSERTS" }
+
+  - anchor: "[[TABLE:SOURCE_REGISTER]]"
+    insert: { type: "table", id: "TBL-SOURCE-REGISTER" }

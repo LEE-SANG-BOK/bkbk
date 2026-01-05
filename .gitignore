@@ -1,0 +1,30 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+output/
+.env
+.env.*
+
+# Local/binary artifacts (avoid snapshot/git noise)
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+*.heic
+*.zip
+
+.DS_Store
+
+# Stray file sometimes created by shell redirection
+-

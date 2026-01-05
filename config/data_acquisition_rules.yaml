@@ -1,0 +1,182 @@
+version: "1.0"
+
+# 목적:
+# - case.xlsx(v2)의 빈칸/누락을 점검하면서, “어디서 무엇을 요청/수집해야 하는지”를 규칙으로 고정한다.
+# - 초기엔 QA JSON(report)로만 노출해도 되고, 차기에는 source_register.xlsx의 VALIDATION_SUMMARY로 요약한다.
+#
+# 규칙 스키마(초안; 구현 시 확정 필요):
+# rules:
+#   - id: RULE_ID
+#     when:
+#       sheet: SHEET_NAME
+#       column: COLUMN_NAME          # (옵션) 특정 컬럼 검사
+#       is_empty: true               # (옵션) 빈칸 조건
+#       row_count: 0                 # (옵션) 시트 행수 조건
+#       any_of: [col1, col2]         # (옵션) row_count 계산 시 '의미있는 행' 판정 기준 컬럼
+#       condition: "..."             # (옵션) 추가 조건식(차기)
+#     severity: ERROR|WARN|INFO
+#     submission_severity: ERROR|WARN|INFO   # (옵션) --submission 실행 시 덮어쓰기(초안)
+#     message: "..."
+#     suggested_sources:             # (옵션) 확보 경로 안내
+#       - src_id: SRC_...
+#         how: "..."
+
+rules:
+  - id: LOC_MISSING_CENTER
+    when:
+      sheet: LOCATION
+      column: center_lat
+      is_empty: true
+    severity: ERROR
+    message: "LOCATION.center_lat/center_lon이 비어 있습니다(지도/WMS/API 수집 불가)."
+    suggested_sources:
+      - src_id: "SRC_SURVEY_ATTACHMENT"
+        how: "측량성과/좌표 근거(PDF)를 첨부하고 LOCATION에 좌표 입력"
+      - src_id: "SRC_GEOCODE_API"
+        how: "주소 기반 지오코딩(옵션)으로 좌표 확보"
+
+  - id: DRR_RAIN_EMPTY
+    when:
+      sheet: DRR_HYDRO_RAIN
+      row_count: 0
+    severity: ERROR
+    message: "DRR_HYDRO_RAIN이 비어 있습니다(DIA 강우/유출 근거 부족)."
+    suggested_sources:
+      - src_id: "SRC_KMA_ASOS_API"
+        how: "DATA_REQUESTS(KMA_ASOS) 자동 수집 또는 수기 입력"
+
+  - id: AIR_BASELINE_EMPTY
+    when:
+      sheet: ENV_BASE_AIR
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_BASE_AIR이 비어 있습니다(EIA 대기현황 근거가 약해질 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_AIRKOREA_API"
+        how: "DATA_REQUESTS(AIRKOREA) 자동 수집 또는 수기 입력"
+
+  - id: WATER_BASELINE_EMPTY
+    when:
+      sheet: ENV_BASE_WATER
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_BASE_WATER가 비어 있습니다(EIA 수환경/수질 현황 근거가 약해질 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_NIER_WATER_API"
+        how: "DATA_REQUESTS(NIER_WATER) 또는 수질측정망/문헌 기반 수기 입력"
+
+  - id: SOCIO_STATS_EMPTY
+    when:
+      sheet: ENV_BASE_SOCIO
+      row_count: 0
+    severity: INFO
+    submission_severity: ERROR
+    message: "ENV_BASE_SOCIO가 비어 있습니다(인구/세대/주택 통계 근거가 단순화될 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_KOSIS_API"
+        how: "DATA_REQUESTS(KOSIS) 자동 수집 또는 수기 입력"
+
+  - id: GEO_BASELINE_EMPTY
+    when:
+      sheet: ENV_BASE_GEO
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_BASE_GEO가 비어 있습니다(지형/지질/지반 등 기초현황 근거가 약해질 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_TOPO_GEO_REPORT"
+        how: "지질/지반/지형 관련 공식자료(보고서/지도) 또는 설계/조사자료를 첨부하고 요약 입력"
+
+  - id: NOISE_BASELINE_EMPTY
+    when:
+      sheet: ENV_BASE_NOISE
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_BASE_NOISE가 비어 있습니다(소음·진동 현황 근거가 약해질 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_NOISE_SURVEY"
+        how: "현장측정/문헌 기반 소음·진동 현황 입력(근거자료 첨부)"
+
+  - id: ECO_EVENTS_EMPTY
+    when:
+      sheet: ENV_ECO_EVENTS
+      row_count: 0
+      any_of: [date, area_desc, evidence_id]
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_ECO_EVENTS가 비어 있습니다(생태 조사 이벤트/시기 정보가 누락됨)."
+    suggested_sources:
+      - src_id: "SRC_ECO_SURVEY"
+        how: "현장조사 기록(조사일/조사구간/날씨) 또는 조사보고서 기반으로 입력"
+
+  - id: ECO_OBS_EMPTY
+    when:
+      sheet: ENV_ECO_OBS
+      row_count: 0
+      any_of: [taxon_group, scientific_name, korean_name]
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_ECO_OBS가 비어 있습니다(생태 관찰(종/개체수) 근거가 누락됨)."
+    suggested_sources:
+      - src_id: "SRC_ECO_SURVEY"
+        how: "조사 결과(종/개체수/보호종 여부) 입력 + 증빙(사진/조사표) 첨부"
+
+  - id: LANDSCAPE_EMPTY
+    when:
+      sheet: ENV_LANDSCAPE
+      row_count: 0
+      any_of: [viewpoint_name, lat, lon, description, photo_fig_id, simulation_fig_id]
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_LANDSCAPE가 비어 있습니다(조망점/경관 현황 근거가 누락될 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_FIELD_PHOTOS"
+        how: "조망점 사진(현장사진대지) + 좌표/설명 입력"
+
+  - id: ENV_SCOPING_EMPTY
+    when:
+      sheet: ENV_SCOPING
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_SCOPING이 비어 있습니다(평가항목 스코핑(대상/제외) 근거가 누락됨)."
+    suggested_sources:
+      - src_id: "SRC_GUIDELINE_EIA_SCOPING"
+        how: "사업 유형/규모에 따른 스코핑표를 작성하고 근거(지침/협의내용)를 연결"
+
+  - id: ENV_MITIGATION_EMPTY
+    when:
+      sheet: ENV_MITIGATION
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_MITIGATION이 비어 있습니다(저감방안(공사/운영) 표가 누락됨)."
+    suggested_sources:
+      - src_id: "SRC_DESIGN_MEASURES"
+        how: "설계/시공계획 기반 저감방안 목록을 입력하고 근거자료를 연결"
+
+  - id: ENV_MANAGEMENT_EMPTY
+    when:
+      sheet: ENV_MANAGEMENT
+      row_count: 0
+    severity: WARN
+    submission_severity: ERROR
+    message: "ENV_MANAGEMENT가 비어 있습니다(사후관리/이행계획(조건이행) 표가 누락됨)."
+    suggested_sources:
+      - src_id: "SRC_APPROVAL_CONDITIONS"
+        how: "협의조건/이행계획(점검항목·주기·증빙) 기반으로 입력"
+
+  - id: ZONING_OVERLAY_EMPTY
+    when:
+      sheet: ZONING_OVERLAY
+      row_count: 0
+      any_of: [is_applicable, distance_m, direction, basis]
+    severity: WARN
+    submission_severity: ERROR
+    message: "ZONING_OVERLAY이 비어 있습니다(규제/보호구역 해당여부 표가 누락될 수 있음)."
+    suggested_sources:
+      - src_id: "SRC_VWORLD_WMTS"
+        how: "발급본/토지이용계획확인서 첨부 또는 WMS/AUTO_GIS 기반 자동 채움(차기)"

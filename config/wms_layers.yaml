@@ -1,0 +1,126 @@
+version: "1.0"
+
+# 목적:
+# - 표준 OGC WMS(GetMap)와 “WMS조회”처럼 보이지만 실제로는 REST로 이미지를 반환하는 API를
+#   같은 레이어 카탈로그에서 다루기 위한 설정 파일.
+# - 구현 시 provider.type(OGC_WMS/REST_IMAGE)에 따라 요청 방식/파라미터/캐시 키를 분기한다.
+
+providers:
+  # 1) 표준 OGC WMS (환경공간정보서비스 예시: geoserver)
+  mcee_geoserver_wms:
+    type: OGC_WMS
+    # NOTE: Use GeoServer WMS (not GWC tiled WMS) to avoid "resolution threshold" 400 errors.
+    base_url: "https://api.mcee.go.kr/geoserver/wms"
+    default_params:
+      service: "WMS"
+      request: "GetMap"
+      version: "1.1.1"
+      format: "image/png"
+      transparent: "true"
+      styles: ""
+    default_srs: "EPSG:3857"
+    timeout_sec: 20
+
+  # 2) 생활안전지도 WMS (sm/apis.do 형태; 예시가 apiKey/apikey 혼재)
+  safemap_sm_apis:
+    type: OGC_WMS
+    base_url: "https://www.safemap.go.kr/sm/apis.do"
+    auth:
+      mode: "query_param"
+      # NOTE: `apikey`로만 유효하게 인식되는 케이스가 관측됨(HTML alert로 키 오류 반환).
+      key_param_candidates: ["apikey", "apiKey"]
+      env_var: "SAFEMAP_API_KEY"
+    default_params:
+      service: "WMS"
+      request: "GetMap"
+      version: "1.1.1"
+      format: "image/png"
+      transparent: "true"
+      styles: ""
+    default_srs: "EPSG:3857"
+    timeout_sec: 20
+
+  # 3) 생활안전지도 WMS (openApiService/wms/getLayerData.do 형태)
+  safemap_openApiService_wms:
+    type: OGC_WMS
+    base_url: "https://www.safemap.go.kr/openApiService/wms/getLayerData.do"
+    # NOTE: 이 엔드포인트는 `styles` 파라미터가 포함되면 404를 반환하는 동작이 관측됨.
+    # (WMS 표준 구현과 다를 수 있어) 필요 시 omit_params로 제거한다.
+    omit_params: ["styles"]
+    auth:
+      mode: "query_param"
+      key_param_candidates: ["apiKey", "apikey"]
+      env_var: "SAFEMAP_API_KEY"
+    default_params:
+      service: "WMS"
+      request: "GetMap"
+      version: "1.1.1"
+      format: "image/png"
+      transparent: "true"
+      styles: ""
+    default_srs: "EPSG:3857"
+    timeout_sec: 20
+
+  # 4) 공공데이터포털 생태자연도 “WMS조회” (REST 이미지 반환)
+  datago_ecologyzmp_rest:
+    type: REST_IMAGE
+    base_url: "http://apis.data.go.kr/B553084/ecoapi/EcologyzmpService/wms/getEcologyzmpWMS"
+    auth:
+      mode: "query_param"
+      key_param_candidates: ["ServiceKey", "serviceKey"]
+      env_var: "DATA_GO_KR_SERVICE_KEY"
+    param_map:
+      layers: "layers"
+      srs: "srs"
+      bbox: "bbox"
+      width: "width"
+      height: "height"
+      format: "format"
+    bbox_order: "miny,minx,maxy,maxx"
+    default_srs: "EPSG:5186"
+    default_format: "png"
+    timeout_sec: 25
+
+
+layers:
+  # ---------- 생태자연도 ----------
+  ECO_NATURE_MCEE_2015:
+    # NOTE: (legacy key) 과거 설정은 mcee_geoserver_wms의 미존재 레이어(EGIS:eco_2015_g)를 참조하여
+    # ServiceException(XML)이 .png로 저장되는 문제가 있었음.
+    # 현재는 공공데이터포털 “생태자연도 WMS조회” REST 이미지를 사용하도록 alias 처리한다.
+    # - 권장: 신규 케이스는 ECO_NATURE_DATAGO_OPEN 사용
+    provider: datago_ecologyzmp_rest
+    title: "생태자연도(공공데이터포털 WMS조회, legacy key)"
+    layers: "tbl_opn_eczm"
+    srs: "EPSG:5186"
+    src_hint: "국립생태원_생태자연도 서비스(OpenAPI) (legacy key: ECO_NATURE_MCEE_2015)"
+    default_src_ids: ["SRC_DATAGO_ECOLOGYZMP"]
+
+  ECO_NATURE_DATAGO_OPEN:
+    provider: datago_ecologyzmp_rest
+    title: "생태자연도(공공데이터포털 WMS조회)"
+    layers: "tbl_opn_eczm"
+    srs: "EPSG:5186"
+    src_hint: "국립생태원_생태자연도 서비스(OpenAPI)"
+    default_src_ids: ["SRC_DATAGO_ECOLOGYZMP"]
+
+  # ---------- 침수흔적도 ----------
+  FLOOD_TRACE:
+    # Prefer /sm/apis.do: openApiService 엔드포인트는 GetMap 파라미터 조합에서 404/HTML 에러가 관측됨.
+    provider: safemap_sm_apis
+    title: "침수흔적도(생활안전지도)"
+    layers: "A2SM_FLUDMARKS"
+    srs: "EPSG:3857"
+    styles: ""
+    transparent: true
+    default_src_ids: ["SRC_SAFEMAP_FLOOD_TRACE"]
+
+  # ---------- 산사태위험지도 ----------
+  LANDSLIDE_RISK:
+    provider: safemap_sm_apis
+    title: "산사태위험지도(생활안전지도)"
+    layers: "A2SM_SANSATAI"
+    srs: "EPSG:3857"
+    styles: ""
+    transparent: true
+    default_src_ids: ["SRC_SAFEMAP_LANDSLIDE"]

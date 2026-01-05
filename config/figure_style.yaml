@@ -1,0 +1,90 @@
+version: "1.0"
+
+# SSOT: 샘플(창원/기허가) “도면·지도·사진대지” 스타일 토큰(초안)
+# - 목적: 구현(알고리즘)보다 ‘일관된 출력’(프레임/라벨/범례/캡션)을 우선 잠금.
+# - 범위: 색/선/여백/라운드/라벨 박스/번호 배지/범례 박스/사진대지 그리드.
+# - 근거(참조): `eia-gen/docs/37_sample_figure_style_guide.md:1`
+
+fonts:
+  # (선택) 결정론적 폰트 경로는 env로 주입(doctor_env에서 존재 여부 점검)
+  watermark_font_env: "EIA_GEN_WATERMARK_FONT_PATH"
+  # caption/table 등은 템플릿/Word 스타일에 따름(초기엔 python-docx에서 별도 폰트 강제하지 않음)
+
+colors:
+  accent_orange: "#FF8A00"
+  border_dark: "#111111"
+  panel_bg: "#FFFFFF"
+  box_bg_rgba: [255, 255, 255, 220]      # 범례/설명 박스 배경(반투명)
+
+  overlay_fill_rgba: [60, 90, 140, 80]   # 경계 fill(청회/회색 계열)
+  overlay_stroke: "#2F5AA5"
+
+  badge_bg: "#000000"
+  badge_text: "#FFFFFF"
+
+strokes:
+  frame_px: 2
+  boundary_px: 6
+  leader_px: 3
+  dashed_px: 3
+  dashed_pattern: [10, 8]     # on/off(픽셀)
+
+rounding:
+  box_radius_px: 18
+  card_radius_px: 22
+
+layout:
+  # 공통 프레임/여백(정규화 단계와 함께 사용 권장)
+  pad_px: 24
+  border_px: 2
+
+callout_labels:
+  # 콜아웃 박스(“사업 부지”, “추가 조성부지” 등)
+  box:
+    pad_px: 14
+    bg_rgba: [255, 255, 255, 235]
+    border_px: 0
+    radius_px: 18
+  leader:
+    stroke_px: 3
+    arrow: false
+
+number_badges:
+  # 원형/타원형 점선 + 내부 노랑 배경 + 굵은 숫자
+  ellipse:
+    stroke_px: 4
+    stroke: "#2F5AA5"
+    fill_rgba: [255, 213, 79, 160]   # 노랑(반투명)
+    dashed_pattern: [10, 8]
+  text:
+    fill: "#111111"
+
+legend:
+  box:
+    bg_rgba: [255, 255, 255, 220]
+    pad_px: 16
+    radius_px: 18
+  title_fill: "#111111"
+
+callout_composite:
+  # CALLOUT_COMPOSITE(사진대지) 기본 스타일
+  supported_grids: [2, 4, 6]      # 1x2, 2x2, 3x2
+  panel:
+    width_px: 2400
+    height_px: 1600
+    outer_pad_px: 36
+    gap_px: 24
+    border_px: 2
+    bg_rgb: [255, 255, 255]
+  slot:
+    caption_bar_h_px: 120
+    caption_pad_px: 12
+    caption_bg_rgb: [248, 248, 248]
+    cell_border_px: 1
+  badge:
+    w_px: 64
+    h_px: 44
+    margin_px: 10
+    bg_rgb: [0, 0, 0]
+    text_rgb: [255, 255, 255]
+

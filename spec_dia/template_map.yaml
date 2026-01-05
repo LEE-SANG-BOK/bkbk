@@ -1,0 +1,69 @@
+version: "1.0"
+
+template_file: "templates/dia_template.docx"
+
+anchors:
+  - anchor: "[[BLOCK:DIA0_COVER]]"
+    insert: { type: "section", id: "DIA0_COVER" }
+  - anchor: "[[BLOCK:DIA0_SUMMARY]]"
+    insert: { type: "section", id: "DIA0_SUMMARY" }
+
+  - anchor: "[[BLOCK:DIA1_PROJECT]]"
+    insert: { type: "section", id: "DIA1_PROJECT" }
+  - anchor: "[[TABLE:PARCELS]]"
+    insert: { type: "table", id: "TBL-PARCELS" }
+  - anchor: "[[TABLE:FACILITIES]]"
+    insert: { type: "table", id: "TBL-FACILITIES" }
+  - anchor: "[[TABLE:SCHEDULE]]"
+    insert: { type: "table", id: "TBL-SCHEDULE" }
+
+  - anchor: "[[BLOCK:DIA2_TARGET_AREA]]"
+    insert: { type: "section", id: "DIA2_TARGET_AREA" }
+  - anchor: "[[TABLE:DIA_TARGET_AREA]]"
+    insert: { type: "table", id: "TBL-DIA-TARGET-AREA" }
+  - anchor: "[[TABLE:DIA_TARGET_AREA_PARTS]]"
+    insert: { type: "table", id: "TBL-DIA-TARGET-AREA-PARTS" }
+  - anchor: "[[TABLE:DIA_SCOPE]]"
+    insert: { type: "table", id: "TBL-DIA-SCOPING" }
+  - anchor: "[[FIG:FIG-DIA-TARGET-01]]"
+    insert: { type: "figure", id: "FIG-DIA-TARGET-01" }
+
+  - anchor: "[[BLOCK:DIA3_BASELINE]]"
+    insert: { type: "section", id: "DIA3_BASELINE" }
+  - anchor: "[[TABLE:DIA_RAINFALL]]"
+    insert: { type: "table", id: "TBL-DIA-RAINFALL" }
+  - anchor: "[[TABLE:DIA_BASE_HAZARD]]"
+    insert: { type: "table", id: "TBL-DIA-BASE-HAZARD" }
+  - anchor: "[[TABLE:DIA_INTERVIEWS]]"
+    insert: { type: "table", id: "TBL-DIA-INTERVIEWS" }
+  - anchor: "[[TABLE:DIA_DRAINAGE]]"
+    insert: { type: "table", id: "TBL-DIA-DRAINAGE-FACILITIES" }
+  - anchor: "[[FIG:FIG-DIA-DRAINAGE-01]]"
+    insert: { type: "figure", id: "FIG-DIA-DRAINAGE-01" }
+  - anchor: "[[FIG:FIG-DIA-STORMWATER-01]]"
+    insert: { type: "figure", id: "FIG-DIA-STORMWATER-01" }
+
+  - anchor: "[[BLOCK:DIA4_ANALYSIS]]"
+    insert: { type: "section", id: "DIA4_ANALYSIS" }
+  - anchor: "[[TABLE:DIA_RUNOFF]]"
+    insert: { type: "table", id: "TBL-DIA-RUNOFF" }
+  - anchor: "[[TABLE:DIA_SEDIMENT]]"
+    insert: { type: "table", id: "TBL-DIA-SEDIMENT" }
+  - anchor: "[[TABLE:DIA_SLOPE]]"
+    insert: { type: "table", id: "TBL-DIA-SLOPE" }
+
+  - anchor: "[[BLOCK:DIA5_MITIGATION]]"
+    insert: { type: "section", id: "DIA5_MITIGATION" }
+  - anchor: "[[TABLE:DIA_MITIGATION]]"
+    insert: { type: "table", id: "TBL-DIA-MEASURES" }
+
+  - anchor: "[[BLOCK:DIA6_MAINTENANCE]]"
+    insert: { type: "section", id: "DIA6_MAINTENANCE" }
+  - anchor: "[[TABLE:DIA_MAINTENANCE]]"
+    insert: { type: "table", id: "TBL-DIA-MAINTENANCE" }
+
+  - anchor: "[[BLOCK:DIA7_CONCLUSION]]"
+    insert: { type: "section", id: "DIA7_CONCLUSION" }
+
+  - anchor: "[[TABLE:SOURCE_REGISTER]]"
+    insert: { type: "table", id: "TBL-SOURCE-REGISTER" }

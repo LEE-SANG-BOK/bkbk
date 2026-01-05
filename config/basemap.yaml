@@ -1,0 +1,29 @@
+version: "1.0"
+
+# 목적:
+# - 지도 생성 시 사용할 배경지도 provider(WMTS/XYZ) 정의.
+# - VWorld WMTS는 URL 템플릿 기반(GetTile)로 타일을 받으며 API Key는 env에서 주입한다.
+
+providers:
+  vworld_wmts:
+    type: WMTS
+    url_template: "https://api.vworld.kr/req/wmts/1.0.0/{key}/{layer}/{z}/{y}/{x}.{ext}"
+    key_env: "VWORLD_API_KEY"
+    layers:
+      Base: { ext: "png", min_zoom: 6, max_zoom: 19 }
+      white: { ext: "png", min_zoom: 6, max_zoom: 18 }
+      midnight: { ext: "png", min_zoom: 6, max_zoom: 18 }
+      Hybrid: { ext: "png", min_zoom: 6, max_zoom: 19 }
+      Satellite: { ext: "jpeg", min_zoom: 6, max_zoom: 19 }
+
+  osm_tile:
+    type: XYZ
+    url_template: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+    min_zoom: 0
+    max_zoom: 19
+
+defaults:
+  provider: vworld_wmts
+  layer: Base
+  zoom_strategy: AUTO # AUTO 또는 고정값(예: 15)
+

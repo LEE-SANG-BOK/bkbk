@@ -1,0 +1,23 @@
+version: "1.0"
+
+# 목적:
+# - WMTS(타일 좌표) / WMS·REST(요청 파라미터) 결과를 로컬 디스크에 캐시해
+#   반복 실행 시 동일 요청을 재사용하고 재현 가능성을 확보한다.
+
+cache:
+  enabled: true
+  root_dir: ".cache/maps"
+  ttl_days: 30
+
+  # WMTS는 타일 좌표 기반으로 파일 경로가 결정됨
+  wmts:
+    path_template: "wmts/{provider}/{layer}/{z}/{y}/{x}.{ext}"
+
+  # WMS/REST는 bbox+size(+레이어/파라미터)가 키이므로 hash 기반이 안전
+  # - hash = sha1(base_url + sorted(params))
+  wms:
+    path_template: "wms/{provider}/{layer}/{srs}/{hash}.png"
+
+  http:
+    # requests-cache 같은 라이브러리 사용 여부(선택)
+    use_requests_cache: false

@@ -1,0 +1,87 @@
+version: "1.0"
+
+defaults:
+  require_source_ids: true
+  empty_caption: "[작성자 캡션 기입]"
+
+figures:
+  - id: "FIG-LOC-01"
+    anchor: "[[FIG:FIG-LOC-01]]"
+    caption: "사업지 위치도"
+    chapter: 1
+    required: true
+    asset_type: "location_map"
+    must_include:
+      - "사업지 경계"
+      - "행정구역"
+      - "접근도로"
+
+  - id: "FIG-LANDUSE-01"
+    anchor: "[[FIG:FIG-LANDUSE-01]]"
+    caption: "토지이용/용도지역 현황도"
+    chapter: 2
+    required: true
+    asset_type: "landuse_plan"
+
+  - id: "FIG-AERIAL-01"
+    anchor: "[[FIG:FIG-AERIAL-01]]"
+    caption: "항공/드론 현황사진(이격거리 표기 권장)"
+    chapter: 2
+    required: true
+    asset_type: "aerial_photo"
+
+  - id: "FIG-LAYOUT-01"
+    anchor: "[[FIG:FIG-LAYOUT-01]]"
+    caption: "시설배치도(주요 시설/도로/주차/배수 흐름)"
+    chapter: 1
+    required: true
+    asset_type: "layout_plan"
+
+  - id: "FIG-DRAINAGE-01"
+    anchor: "[[FIG:FIG-DRAINAGE-01]]"
+    caption: "배수계통도(침사지/집수정 등)"
+    chapter: 4
+    required: true
+    asset_type: "drainage_map"
+
+  - id: "FIG-IA-01"
+    anchor: "[[FIG:FIG-IA-01]]"
+    caption: "조사범위(영향권) 설정도"
+    chapter: 2
+    required: true
+    asset_type: "influence_area_map"
+    constraints:
+      map_scale_range: "1:3000~1:25000"
+
+  - id: "FIG-ECO-ROUTE-01"
+    anchor: "[[FIG:FIG-ECO-ROUTE-01]]"
+    caption: "동·식물상 조사경로 및 조사지점도"
+    chapter: 2
+    required_if:
+      scoping_item_id: "NAT_ECO"
+      category_in: ["중점","현황"]
+    asset_type: "eco_route_map"
+
+  - id: "FIG-ECO-PHOTO-01"
+    anchor: "[[FIG:FIG-ECO-PHOTO-01]]"
+    caption: "동·식물상 현장조사 주요 사진"
+    chapter: 2
+    required_if:
+      scoping_item_id: "NAT_ECO"
+      category_in: ["중점","현황"]
+    asset_type: "photo_sheet"
+
+  - id: "FIG-VP-01"
+    anchor: "[[FIG:FIG-VP-01]]"
+    caption: "주요 조망점(VP-01) 현황 사진"
+    chapter: 2
+    required: true
+    asset_type: "photo"
+
+  - id: "FIG-VP-02"
+    anchor: "[[FIG:FIG-VP-02]]"
+    caption: "주요 조망점(VP-02) 현황 사진"
+    chapter: 2
+    required: false
+    asset_type: "photo"
+

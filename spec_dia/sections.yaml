@@ -1,0 +1,129 @@
+version: "1.0"
+
+doc_profile:
+  report_type: "소규모재해영향평가서(재해영향성검토서)"
+  project_type: "관광농원"
+  language: "ko"
+  numbering:
+    chapter_style: "제{n}장"
+    table_style: "표 {ch}-{n}"
+    figure_style: "그림 {ch}-{n}"
+  forbidden_phrases:
+    - "문제 없음"
+    - "영향 없음"
+    - "영향이 없음"
+
+global_rules:
+  # NOTE: global_rules는 문서로 SSOT를 유지하기 위한 메타이며,
+  # 현재 엔진은 forbidden_phrases/조건부 출력 위주로 사용한다.
+  scoping:
+    categories: ["중점", "현황", "제외"]
+    require_exclude_reason_if_excluded: true
+  prior_assessment_omission:
+    enable: false
+    basis: ""
+    rule_ref_source_id: ""
+  small_scale_special:
+    default_no_manager_no_post_monitoring: true
+    conditional_sections: {}
+
+sections:
+  - id: "DIA0_COVER"
+    heading: "표지"
+    anchor: "[[BLOCK:DIA0_COVER]]"
+    mode: "deterministic"
+    input_paths: ["cover", "project_overview"]
+
+  - id: "DIA0_SUMMARY"
+    heading: "요약"
+    anchor: "[[BLOCK:DIA0_SUMMARY]]"
+    mode: "hybrid"
+    input_paths:
+      - "project_overview"
+      - "survey_plan"
+      - "disaster"
+    outputs: {}
+
+  - id: "DIA1_PROJECT"
+    heading: "제1장 사업의 개요"
+    anchor: "[[BLOCK:DIA1_PROJECT]]"
+    mode: "hybrid"
+    input_paths:
+      - "project_overview"
+      - "project_overview.schedule"
+      - "project_overview.area"
+      - "project_overview.contents_scale"
+
+  - id: "DIA2_TARGET_AREA"
+    heading: "제2장 평가대상지역 설정"
+    anchor: "[[BLOCK:DIA2_TARGET_AREA]]"
+    mode: "hybrid"
+    input_paths:
+      - "survey_plan"
+      - "disaster.target_area"
+      - "disaster.target_area_parts"
+      - "disaster.scoping_matrix"
+      - "assets"
+    outputs:
+      tables: ["TBL-DIA-TARGET-AREA", "TBL-DIA-TARGET-AREA-PARTS", "TBL-DIA-SCOPING"]
+      figures: ["FIG-DIA-TARGET-01"]
+
+  - id: "DIA3_BASELINE"
+    heading: "제3장 재해 관련 기초현황"
+    anchor: "[[BLOCK:DIA3_BASELINE]]"
+    mode: "hybrid"
+    input_paths:
+      - "disaster.rainfall"
+      - "disaster.hazard_history"
+      - "disaster.interviews"
+      - "disaster.drainage_facilities"
+      - "baseline.topography_geology"
+      - "project_overview.location"
+    outputs:
+      tables:
+        ["TBL-DIA-RAINFALL", "TBL-DIA-BASE-HAZARD", "TBL-DIA-INTERVIEWS", "TBL-DIA-DRAINAGE-FACILITIES"]
+
+  - id: "DIA4_ANALYSIS"
+    heading: "제4장 재해영향 분석"
+    anchor: "[[BLOCK:DIA4_ANALYSIS]]"
+    mode: "hybrid"
+    input_paths:
+      - "disaster.runoff_basins"
+      - "disaster.sediment_erosion"
+      - "disaster.slope_landslide"
+    outputs:
+      tables: ["TBL-DIA-RUNOFF", "TBL-DIA-SEDIMENT", "TBL-DIA-SLOPE"]
+
+  - id: "DIA5_MITIGATION"
+    heading: "제5장 재해 저감대책"
+    anchor: "[[BLOCK:DIA5_MITIGATION]]"
+    mode: "hybrid"
+    input_paths:
+      - "disaster.measures"
+      - "disaster.drainage_facilities"
+    outputs:
+      tables: ["TBL-DIA-MEASURES"]
+
+  - id: "DIA6_MAINTENANCE"
+    heading: "제6장 유지관리계획 및 유지관리대장"
+    anchor: "[[BLOCK:DIA6_MAINTENANCE]]"
+    mode: "hybrid"
+    input_paths:
+      - "disaster.maintenance_ledger"
+    outputs:
+      tables: ["TBL-DIA-MAINTENANCE"]
+
+  - id: "DIA7_CONCLUSION"
+    heading: "제7장 종합결론"
+    anchor: "[[BLOCK:DIA7_CONCLUSION]]"
+    mode: "hybrid"
+    input_paths:
+      - "disaster"
+      - "project_overview"
+
+  - id: "APPX_SOURCES"
+    heading: "부록 / 출처·근거 관리표"
+    anchor: "[[TABLE:SOURCE_REGISTER]]"
+    mode: "deterministic"
+    outputs:
+      tables: ["TBL-SOURCE-REGISTER"]

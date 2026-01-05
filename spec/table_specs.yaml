@@ -1,0 +1,295 @@
+version: "1.0"
+
+defaults:
+  include_src_column: true
+  src_render: "join"
+  empty_cell: "[작성자 기입 필요]"
+
+tables:
+  - id: "TBL-PARCELS"
+    anchor: "[[TABLE:PARCELS]]"
+    caption: "지번별 면적 및 토지이용(지목/용도지역) 현황"
+    chapter: 1
+    label: "2.2"
+    data_path: "project_overview.area.parcels"
+    columns:
+      - { key: "no", title: "No", type: "auto_index" }
+      - { key: "jibun", title: "지번", type: "text", path: "jibun.t" }
+      - { key: "land_category", title: "지목", type: "text", path: "land_category.t" }
+      - { key: "zoning", title: "용도지역", type: "text", path: "zoning.t", allow_empty: true }
+      - { key: "area_m2", title: "면적(m²)", type: "number", path: "area_m2.v", unit_path: "area_m2.u" }
+      - { key: "note", title: "비고", type: "text", path: "note.t", allow_empty: true }
+    validations:
+      - id: "E-AREA-001"
+        type: "sum_equals"
+        sum_path: "project_overview.area.parcels[].area_m2.v"
+        total_path: "project_overview.area.total_area_m2.v"
+        tolerance_ratio: 0.005
+        severity: "ERROR"
+
+  - id: "TBL-FACILITIES"
+    anchor: "[[TABLE:FACILITIES]]"
+    caption: "주요 시설별 계획(규모·면적·수용인원)"
+    chapter: 1
+    data_path: "project_overview.contents_scale.facilities"
+    columns:
+      - { key: "category", title: "구분", type: "text", path: "category.t" }
+      - { key: "name", title: "시설명", type: "text", path: "name.t" }
+      - { key: "qty", title: "수량", type: "number", path: "qty.v", unit_path: "qty.u", allow_empty: true }
+      - { key: "area_m2", title: "면적(m²)", type: "number", path: "area_m2.v", unit_path: "area_m2.u", allow_empty: true }
+      - { key: "capacity", title: "수용(명)", type: "number", path: "capacity_person.v", unit_path: "capacity_person.u", allow_empty: true }
+      - { key: "note", title: "비고", type: "text", path: "note.t", allow_empty: true }
+    validations:
+      - id: "W-FAC-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-SCHEDULE"
+    anchor: "[[TABLE:SCHEDULE]]"
+    caption: "사업 추진 일정(공정)"
+    chapter: 1
+    data_path: "project_overview.schedule.milestones"
+    columns:
+      - { key: "phase", title: "단계", type: "text", path: "phase.t" }
+      - { key: "start", title: "시작", type: "date_ym", path: "start.t" }
+      - { key: "end", title: "종료", type: "date_ym", path: "end.t" }
+    validations:
+      - id: "E-DATE-001"
+        type: "date_format"
+        path: "project_overview.schedule.milestones[].start.t"
+        format: "YYYY-MM"
+        severity: "ERROR"
+
+  - id: "TBL-SCOPING"
+    anchor: "[[TABLE:SCOPING]]"
+    caption: "평가항목 선정(중점/현황조사/평가제외) 및 사유"
+    chapter: 3
+    label: "3.1.3"
+    data_path: "scoping_matrix"
+    columns:
+      - { key: "item_id", title: "항목코드", type: "text", path: "item_id" }
+      - { key: "item_name", title: "항목", type: "text", path: "item_name" }
+      - { key: "category", title: "구분", type: "enum", path: "category.t", enum: ["중점","현황","제외"] }
+      - { key: "baseline_method", title: "현황조사 방법", type: "text", path: "baseline_method.t" }
+      - { key: "prediction_method", title: "예측/평가 방법", type: "text", path: "prediction_method.t", allow_empty: true }
+      - { key: "exclude_reason", title: "제외 사유", type: "text", path: "exclude_reason.t", allow_empty: true }
+      - { key: "src_expected", title: "예상 출처", type: "list", path: "src_expected" }
+    validations:
+      - id: "E-SCOPE-001"
+        type: "required_if"
+        condition:
+          path: "category.t"
+          equals: "제외"
+        required_path: "exclude_reason.t"
+        severity: "ERROR"
+
+  - id: "TBL-ZONING-BREAKDOWN"
+    anchor: "[[TABLE:ZONING_BREAKDOWN]]"
+    caption: "용도지역별 면적 및 비율(가능한 경우)"
+    chapter: 1
+    data_path: "project_overview.area.zoning_area_m2"
+    columns:
+      - { key: "zoning", title: "용도지역", type: "key_name" }
+      - { key: "area_m2", title: "면적(m²)", type: "number", value_from: "dict_value.v", unit_from: "dict_value.u" }
+      - { key: "ratio_pct", title: "비율(%)", type: "computed_ratio", numerator_from: "dict_value.v", denominator_path: "project_overview.area.total_area_m2.v" }
+    validations:
+      - id: "W-ZONING-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-ZONING-OVERLAY"
+    anchor: "[[TABLE:ZONING_OVERLAY]]"
+    caption: "환경관련 지구·지역(보호/규제) 해당 여부 총괄(O/X) 및 이격거리"
+    chapter: 2
+    label: "2.3"
+    data_path: "zoning_overlay"
+    columns:
+      - { key: "no", title: "No", type: "auto_index" }
+      - { key: "category", title: "분야", type: "text", path: "category.t" }
+      - { key: "designation_name", title: "지구·지역", type: "text", path: "designation_name.t" }
+      - { key: "is_applicable", title: "해당(O/X)", type: "text", path: "is_applicable.t" }
+      - { key: "distance_m", title: "이격(m)", type: "number", path: "distance_m.v", unit_path: "distance_m.u", allow_empty: true }
+      - { key: "direction", title: "방향", type: "text", path: "direction.t", allow_empty: true }
+      - { key: "basis", title: "근거", type: "text", path: "basis.t" }
+    validations:
+      - id: "W-ZONING-OVERLAY-001"
+        type: "min_rows"
+        min: 1
+        severity: "WARN"
+
+  - id: "TBL-BASELINE-SUMMARY"
+    anchor: "[[TABLE:BASELINE_SUMMARY]]"
+    caption: "대상지 및 주변 환경현황 요약"
+    chapter: 2
+    mode: "assembled"
+    rows_definition:
+      - label: "대기질"
+        items:
+          - { name: "PM10", path: "baseline.air_quality.pm10_ugm3", value: "v", unit: "u", src: "src" }
+          - { name: "PM2.5", path: "baseline.air_quality.pm25_ugm3", value: "v", unit: "u", src: "src" }
+          - { name: "O3", path: "baseline.air_quality.ozone_ppm", value: "v", unit: "u", src: "src" }
+      - label: "수질"
+        items:
+          - { name: "BOD", path: "baseline.water_environment.water_quality.bod_mgL", value: "v", unit: "u", src: "src" }
+      - label: "소음"
+        items:
+          - { name: "주간소음", path: "baseline.noise_vibration.receptors[].baseline_day_db", value: "v", unit: "u", src: "src" }
+          - { name: "야간소음", path: "baseline.noise_vibration.receptors[].baseline_night_db", value: "v", unit: "u", src: "src" }
+    validations:
+      - id: "E-SRC-001"
+        type: "require_src_for_numeric"
+        severity: "ERROR"
+
+  # Sample-repeat environment standards tables (static; minimal SSOT)
+  - id: "TBL-ENV-AIR-STANDARDS"
+    anchor: "[[TABLE:ENV_AIR_STANDARDS]]"
+    caption: "대기환경기준"
+    chapter: 2
+    label: "2.4-1"
+    mode: "static"
+    include_src_column: false
+    headers: ["항목", "기준"]
+    rows:
+      - ["이황산가스(SO₂)", "연간 평균치 0.02ppm 이하\n24시간 평균치 0.05ppm 이하\n1시간 평균치 0.15ppm 이하"]
+      - ["일산화탄소(CO)", "8시간 평균치 9ppm 이하\n1시간 평균치 25ppm 이하"]
+      - ["이산화질소(NO₂)", "연간 평균치 0.03ppm 이하\n24시간 평균치 0.06ppm 이하\n1시간 평균치 0.10ppm 이하"]
+      - ["미세먼지(PM-10)", "연간 평균치 50㎍/㎥ 이하\n24시간 평균치 100㎍/㎥ 이하"]
+      - ["초미세먼지(PM-2.5)", "연간 평균치 15㎍/㎥ 이하\n24시간 평균치 35㎍/㎥ 이하"]
+      - ["오존(O₃)", "8시간 평균치 0.06ppm 이하\n1시간 평균치 0.10ppm 이하"]
+      - ["납(Pb)", "연간 평균치 0.5㎍/㎥ 이하"]
+      - ["벤젠", "연간 평균치 5㎍/㎥ 이하"]
+    source_ids: ["S-01"]
+
+  - id: "TBL-ENV-LIVING-STANDARDS"
+    anchor: "[[TABLE:ENV_LIVING_STANDARDS]]"
+    caption: "생활환경 기준"
+    chapter: 2
+    label: "2.4-3"
+    mode: "static"
+    include_src_column: false
+    headers:
+      ["구분", "등급", "상태(쾌적)등급", "수소이온농도(pH)", "생물화학적산소요구량(BOD)(mg/L)", "화학적산소요구량(COD)(mg/L)", "총유기탄소량(TOC)(mg/L)", "부유물질량(SS)(mg/L)", "용존산소량(DO)(mg/L)", "총인(T-P)(mg/L)", "대장균군수(개/100mL)"]
+    rows:
+      - ["생활환경기준", "매우좋음", "Ia", "6.5~8.5", "1 이하", "2 이하", "2 이하", "25 이하", "7.5 이상", "0.02 이하", "50 이하"]
+      - ["생활환경기준", "좋음", "Ib", "6.5~8.5", "2 이하", "4 이하", "3 이하", "25 이하", "5.0 이상", "0.04 이하", "500 이하"]
+      - ["생활환경기준", "약간좋음", "II", "6.5~8.5", "3 이하", "5 이하", "4 이하", "25 이하", "5.0 이상", "0.1 이하", "1,000 이하"]
+      - ["생활환경기준", "보통", "III", "6.5~8.5", "5 이하", "7 이하", "5 이하", "25 이하", "5.0 이상", "0.2 이하", "5,000 이하"]
+      - ["생활환경기준", "약간나쁨", "IV", "6.0~8.5", "8 이하", "9 이하", "6 이하", "100 이하", "2.0 이상", "0.3 이하", "-"]
+      - ["생활환경기준", "나쁨", "V", "6.0~8.5", "10 이하", "11 이하", "8 이하", "쓰레기 등이 떠있지 않을 것", "2.0 이상", "0.5 이하", "-"]
+      - ["생활환경기준", "매우나쁨", "VI", "-", "10 초과", "11 초과", "8 초과", "-", "2.0 미만", "0.5 초과", "-"]
+    source_ids: ["S-01"]
+
+  - id: "TBL-ENV-NOISE-STANDARDS"
+    anchor: "[[TABLE:ENV_NOISE_STANDARDS]]"
+    caption: "생활소음 규제기준(단위: dB(A))"
+    chapter: 2
+    label: "2.4-5"
+    mode: "static"
+    include_src_column: false
+    headers: ["대상지역", "소음원", "시간대별", "아침·저녁(05:00~07:00,18:00~22:00)", "주간(07:00~18:00)", "야간(22:00~05:00)"]
+    rows:
+      - [
+          "가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역",
+          "옥외설치",
+          "확성기",
+          "60 이하",
+          "65 이하",
+          "60 이하",
+        ]
+      - [
+          "가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역",
+          "옥외설치",
+          "옥내에서 옥외로 소음이 나오는 경우",
+          "50 이하",
+          "55 이하",
+          "45 이하",
+        ]
+      - [
+          "가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역",
+          "공장",
+          "-",
+          "50 이하",
+          "55 이하",
+          "45 이하",
+        ]
+      - [
+          "가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역",
+          "사업장(동일 건물 밖에 지역에 있는 경우)",
+          "-",
+          "45 이하",
+          "50 이하",
+          "40 이하",
+        ]
+      - [
+          "가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역",
+          "기타",
+          "-",
+          "50 이하",
+          "55 이하",
+          "45 이하",
+        ]
+      - ["가. 주거지역·녹지지역·취락지구 및 이에 준하는 지역", "공사장", "-", "60 이하", "65 이하", "50 이하"]
+      - ["나. 그 밖의 지역", "옥외설치", "확성기", "65 이하", "70 이하", "60 이하"]
+      - ["나. 그 밖의 지역", "옥외설치", "옥내에서 옥외로 소음이 나오는 경우", "60 이하", "65 이하", "55 이하"]
+      - ["나. 그 밖의 지역", "공장", "-", "60 이하", "65 이하", "55 이하"]
+      - ["나. 그 밖의 지역", "사업장(동일 건물 밖에 지역에 있는 경우)", "-", "50 이하", "55 이하", "45 이하"]
+      - ["나. 그 밖의 지역", "기타", "-", "60 이하", "65 이하", "55 이하"]
+      - ["나. 그 밖의 지역", "공사장", "-", "65 이하", "70 이하", "50 이하"]
+    source_ids: ["S-01"]
+
+  - id: "TBL-MITIGATION-PLAN"
+    anchor: "[[TABLE:MITIGATION_PLAN]]"
+    caption: "환경보전 및 저감방안(단계별)"
+    chapter: 4
+    data_path: "mitigation.measures"
+    columns:
+      - { key: "measure_id", title: "대책ID", type: "text", path: "measure_id" }
+      - { key: "phase", title: "단계", type: "enum", path: "phase.t", enum: ["공사","운영"] }
+      - { key: "related_impacts", title: "관련항목", type: "list", path: "related_impacts" }
+      - { key: "title", title: "대책명", type: "text", path: "title.t" }
+      - { key: "description", title: "주요내용", type: "text", path: "description.t" }
+      - { key: "location_ref", title: "위치/도면", type: "text", path: "location_ref.t" }
+      - { key: "monitoring", title: "관리·점검", type: "text", path: "monitoring.t", allow_empty: true }
+
+  - id: "TBL-CONDITION-TRACKER"
+    anchor: "[[TABLE:CONDITION_TRACKER]]"
+    caption: "협의의견(조건) 이행관리대장"
+    chapter: 5
+    data_path: "management_plan.implementation_register"
+    columns:
+      - { key: "item", title: "협의의견/조건", type: "text", path: "item.t" }
+      - { key: "measure_id", title: "대응 대책ID", type: "text", path: "measure_id.t" }
+      - { key: "when", title: "이행시기", type: "text", path: "when.t" }
+      - { key: "evidence", title: "증빙", type: "text", path: "evidence.t", allow_empty: true }
+      - { key: "responsible", title: "담당(해당 시)", type: "text", path: "responsible.t", allow_empty: true }
+
+  - id: "TBL-SOURCE-REGISTER"
+    anchor: "[[TABLE:SOURCE_REGISTER]]"
+    caption: "출처/근거 관리표(Source Register)"
+    chapter: 0
+    mode: "sources_registry"
+
+  - id: "TBL-ECO-FLORA"
+    anchor: "[[TABLE:ECO_FLORA]]"
+    caption: "동·식물상 조사결과(식물상)"
+    chapter: 2
+    data_path: "baseline.ecology.flora_list"
+    columns:
+      - { key: "species_ko", title: "국명", type: "text", path: "species_ko.t" }
+      - { key: "scientific", title: "학명", type: "text", path: "scientific.t", allow_empty: true }
+      - { key: "protected", title: "보호종", type: "text", path: "protected.t", allow_empty: true }
+      - { key: "note", title: "비고", type: "text", path: "note.t", allow_empty: true }
+
+  - id: "TBL-ECO-FAUNA"
+    anchor: "[[TABLE:ECO_FAUNA]]"
+    caption: "동·식물상 조사결과(동물상)"
+    chapter: 2
+    data_path: "baseline.ecology.fauna_list"
+    columns:
+      - { key: "species_ko", title: "국명", type: "text", path: "species_ko.t" }
+      - { key: "scientific", title: "학명", type: "text", path: "scientific.t" }
+      - { key: "protected", title: "보호종", type: "text", path: "protected.t" }
+      - { key: "evidence", title: "증거(목격/흔적 등)", type: "text", path: "evidence.t" }
+      - { key: "note", title: "비고", type: "text", path: "note.t" }
